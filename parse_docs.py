@@ -11,9 +11,7 @@ class Parse_cacm:
 		self.category_markers = ['.I', '.T', '.W', '.B', '.A', '.N', '.X', '.K', '.C']
 
 		self.documents = {}
-
 		self.text_processor = Process_text(common_words_path)
-
 
 	def parse_file(self):
 		while (self.current_line_number < len(self.lines)-1): # -1 because we do all the iteration stuff at the end of the loop, instead of the beginning

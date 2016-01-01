@@ -16,13 +16,15 @@ class Process_text:
 		# 2x as fast... But it's not a one-liner.
 		# stop_words = set(self.stop_list)
 		# for sw in stop_words.intersection(words_list):
-		# 	while sw in words_list:
+		# 	occurences = words_list.count(sw)
+		# 	for i in xrange(occurences):
 		# 		words_list.remove(sw)
 
 		# return words_list
 
 	def word_statistics(self, words_list):
-		return dict(Counter(words_list))
+		# This is not normalized by the size of the words. Should it ?
+		return Counter(words_list)
 
 
 	def sanitize_rawtext(self, raw_text):

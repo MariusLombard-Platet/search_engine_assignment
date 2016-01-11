@@ -22,12 +22,11 @@ class Parse_cacm:
 			# Parses the document. Stops on a new document declaration (line = .I \d+)
 			if(match):
 				document = self.process_document(int(match.group('id')))
-
 			else:
 				self.current_line_number += 1
 
 		# The index is of the form [(document_id, {word: tf, ...}), ...]
-		print self.documents[47]
+		# print self.documents[47]
 		
 		return self.documents
 

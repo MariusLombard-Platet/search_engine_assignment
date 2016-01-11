@@ -7,7 +7,7 @@ class Reverse_index:
 			self.reverse_index = OOBTree()
 			self.index_type = 'BTree'
 		else:
-			self.reverse_index = defaultdict(list)
+			self.reverse_index = defaultdict(dict)
 			self.index_type = 'defaultdict'
 
 		return None
@@ -29,16 +29,16 @@ class Reverse_index:
 
 
 	def add_entry_defaultdict(self, term, document_id, ponderation):
-		self.reverse_index[term].append((document_id, ponderation))
+		self.reverse_index[term][document_id] = ponderation
 		
 		return None
 
 
 	def add_entry_btree(self, term, document_id, ponderation):
 		if(term in self.reverse_index.keys()): # the term is already in the tree
-			self.reverse_index[term].append((document_id, ponderation))
+			self.reverse_index[term][document_id] = ponderation
 		else:
-			self.reverse_index[term] = [(document_id, ponderation)]
+			self.reverse_index[term] = {document_id: ponderation}
 
 		return None
 

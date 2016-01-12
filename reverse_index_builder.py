@@ -34,18 +34,34 @@ class Reverse_index_builder:
 		N = len(index)
 		idf_counter = self.create_idf_counter(index)
 		reverse_index = Reverse_index()
+		id_list = []
 
-		for (i,(document_id, tf_counter)) in enumerate(index):
+		for (document_id, tf_counter) in index:
 			for term in tf_counter:
 				tf_idf_ponderation = (1 + self.custom_log(tf_counter[term])) * log(float(N) / idf_counter[term])
 				reverse_index.add_entry(term, document_id, tf_idf_ponderation)
+
+				id_list.append(document_id)
+
+		reverse_index.set_id_set(set(id_list))
 
 		return reverse_index
 
 
 	def create_with_ponderation_normal_tf_idf(self, index):
-		# TODO
-		pass
+		reverse_index = self.create_with_ponderation_tf_idf(index)
+
+		for word in reverse_index.get_index():
+			# max_ponderation = 0
+			# for document_id in reverse_index.get_entry(word):
+			# 	max_ponderation = max(max_ponderation, reverse_index.get_entry(word)[document_id])
+			max_ponderation = max(reverse_index.get_entry(word).values())
+
+			# In-place modification. Avoids huge entries duplications.
+			for document_id in reverse_index.get_entry(word):
+				reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / max_ponderation
+
+		return reverse_index
 
 	def create_create_with_ponderation_normal_frequency(self, index):
 		# TODO

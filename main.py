@@ -1,6 +1,7 @@
 from parse_docs import Parse_cacm
 from reverse_index_builder import Reverse_index_builder
 from boolean_search import Boolean_search
+from vectorial_search import Vectorial_search
 import time
 
 t0 = time.time()
@@ -15,7 +16,7 @@ t2 = time.time()
 print 'parsing : ', t2 - t1
 # print index
 
-Reverse_index_builder = Reverse_index_builder(Reverse_index_builder.PONDERATION_NORMAL_TF_IDF)
+Reverse_index_builder = Reverse_index_builder()
 
 reverse_index = Reverse_index_builder.create_reverse_index(index)
 
@@ -28,10 +29,13 @@ print 'rev_index : ', t4 - t2
 # print reverse_index['series']
 
 
-boolean_search = Boolean_search(reverse_index)
-print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ',
-print boolean_search.do_search('multiplexor OR nonrational OR series AND NOT conclusion')
+# boolean_search = Boolean_search(reverse_index)
+# print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ',
+# print boolean_search.do_search('multiplexor OR nonrational OR series AND NOT conclusion')
+vectorial_search = Vectorial_search(reverse_index)
+
+print vectorial_search.do_search('series conclusion')
 t6 = time.time()
-print 'bool search : ', t6-t4
+print 'search : ', t6-t4
 
 print 'total : ', t6 - t0

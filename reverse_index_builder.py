@@ -12,7 +12,7 @@ class Reverse_index_builder:
     # Contains, after init, the method that will be called in order to construct the reverse index
     ponderation_method = None
 
-    def __init__(self, ponderation_method):
+    def __init__(self, ponderation_method=PONDERATION_NORMAL_TF_IDF):
         if(ponderation_method == self.PONDERATION_TF_IDF):
             self.ponderation_method = self.create_with_ponderation_tf_idf
 
@@ -32,29 +32,32 @@ class Reverse_index_builder:
 
     def create_with_ponderation_tf_idf(self, index):
         N = len(index)
-        idf_counter = self.create_idf_counter(index)
         reverse_index = Reverse_index()
-        id_list = []
+        reverse_index.idf = self.create_idf_counter(index)
+        id_full_list = []
 
         for (document_id, tf_counter) in index:
             for term in tf_counter:
-                tf_idf_ponderation = (1 + self.custom_log(tf_counter[term])) * log(float(N) / idf_counter[term])
+                tf_idf_ponderation = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term])
                 reverse_index.add_entry(term, document_id, tf_idf_ponderation)
 
-                id_list.append(document_id)
+                id_full_list.append(document_id)
 
-        reverse_index.set_id_set(set(id_list))
+        reverse_index.set_id_set(set(id_full_list))
+        reverse_index.other_infos['number of documents'] = N
 
         return reverse_index
 
     def create_with_ponderation_normal_tf_idf(self, index):
         reverse_index = self.create_with_ponderation_tf_idf(index)
+        reverse_index.other_infos['max_unnormalized_ponderation'] = defaultdict(float)
 
         for word in reverse_index.get_index():
             # max_ponderation = 0
             # for document_id in reverse_index.get_entry(word):
             #   max_ponderation = max(max_ponderation, reverse_index.get_entry(word)[document_id])
             max_ponderation = max(reverse_index.get_entry(word).values())
+            reverse_index.other_infos['max_unnormalized_ponderation'][word] = max_ponderation
 
             # In-place modification. Avoids huge entries duplications.
             for document_id in reverse_index.get_entry(word):

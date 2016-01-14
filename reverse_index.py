@@ -12,10 +12,12 @@ class Reverse_index:
             self.index_type = 'defaultdict'
 
         self.id_set = None
+        self.idf = {}
+        self.other_infos = {}
 
         return None
 
-    def store_all_ids(self):
+    def _store_all_ids(self):
         ids_list = []
         for word in self.reverse_index:
             ids_list.extend(self.reverse_index[word].keys())
@@ -32,7 +34,7 @@ class Reverse_index:
         if self.id_set:
             return self.id_set
         else:
-            self.set_id_set(self.store_all_ids())
+            self.set_id_set(self._store_all_ids())
             return self.id_set
 
     def set_id_set(self, id_set):
@@ -47,21 +49,26 @@ class Reverse_index:
 
         if document_id in dict_of_docs.keys():
             return dict_of_docs[document_id]
+        else:
+            return 0
+
+    def get_all_words(self):
+        return self.get_index().keys()
 
     def add_entry(self, term, document_id, ponderation):
         if self.index_type == 'BTree':
-            self.add_entry_btree(term, document_id, ponderation)
+            self._add_entry_btree(term, document_id, ponderation)
         else:
-            self.add_entry_defaultdict(term, document_id, ponderation)
+            self._add_entry_defaultdict(term, document_id, ponderation)
 
         return None
 
-    def add_entry_defaultdict(self, term, document_id, ponderation):
+    def _add_entry_defaultdict(self, term, document_id, ponderation):
         self.reverse_index[term][document_id] = ponderation
 
         return None
 
-    def add_entry_btree(self, term, document_id, ponderation):
+    def _add_entry_btree(self, term, document_id, ponderation):
         if(term in self.reverse_index.keys()):  # The term is already in the tree
             self.reverse_index[term][document_id] = ponderation
         else:

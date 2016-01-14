@@ -29,8 +29,9 @@ print 'rev_index : ', t4 - t2
 
 
 boolean_search = Boolean_search(reverse_index)
-print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ', boolean_search.do_search('multiplexor OR nonrational OR series AND NOT conclusion')
+print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ',
+print boolean_search.do_search('multiplexor OR nonrational OR series AND NOT conclusion')
 t6 = time.time()
 print 'bool search : ', t6-t4
 
-print 'total : ', t6-t0
+print 'total : ', t6 - t0

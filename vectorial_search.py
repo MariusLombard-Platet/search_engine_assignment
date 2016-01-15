@@ -1,5 +1,6 @@
 from collections import Counter, defaultdict
 from reverse_index_builder import Reverse_index_builder
+import re
 from math import log
 import operator
 
@@ -31,8 +32,11 @@ class Vectorial_search:
         self.max_results_number = max_results_number
 
     def do_search(self, query):
-        query_words = query.split()
-        similarities = self.searching_method(query_words)
+        # Only use "significant" query words (ie the ones that are in at least one document)
+        query_words = re.findall('\w+', query.lower())
+        significant_query_words = list(set(query_words).intersection(set(self.reverse_index.get_all_words())))
+
+        similarities = self.searching_method(significant_query_words)
         return [
             document_id for (document_id, similarity) in
             sorted(similarities.items(), key=operator.itemgetter(1), reverse=True)[:self.max_results_number]
@@ -41,19 +45,21 @@ class Vectorial_search:
     def _search_cosine(self, query_words):
         document_similarities = {}
         query_weights = self._query_weight(query_words, self.reverse_index.idf)
-        documents_norm = defaultdict(float)  # Contains the sum of the squares of the ponderation for every word, for every document
 
         # Multiply ponderations from document and from query
         documents_unnormalized_similarities = defaultdict(float)
-        for word in self.reverse_index.get_all_words():
+
+        for word in query_words:
             for document_id in self.reverse_index.get_ids_for_term(word):
                 ponderation = self.reverse_index.get_ponderation(word, document_id)
                 documents_unnormalized_similarities[document_id] += ponderation * query_weights[word]
-                documents_norm[document_id] += ponderation ** 2
 
         # Then, divide each document by the sum of the square of its weights
         for document_id in documents_unnormalized_similarities:
-            document_similarities[document_id] = documents_unnormalized_similarities[document_id] / float(documents_norm[document_id])
+            document_similarities[document_id] = (
+                documents_unnormalized_similarities[document_id] /
+                float(self.reverse_index.other_infos['norm']['quadratic'][document_id])
+            )
         # We don't need to divide by the norm of the query vector, since it is the same for every document.
 
         # Order by similarities, return document_ids

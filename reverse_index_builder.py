@@ -30,10 +30,11 @@ class Reverse_index_builder:
     def create_reverse_index(self, index):
         return self.ponderation_method(index)
 
-    def create_with_ponderation_tf_idf(self, index):
+    def create_with_ponderation_tf_idf(self, index, compute_norm=True):
         N = len(index)
         reverse_index = Reverse_index()
         reverse_index.idf = self.create_idf_counter(index)
+        reverse_index.other_infos['norm'] = {'quadratic': defaultdict(float), 'linear': defaultdict(float)}
         id_full_list = []
 
         for (document_id, tf_counter) in index:
@@ -42,6 +43,9 @@ class Reverse_index_builder:
                 reverse_index.add_entry(term, document_id, tf_idf_ponderation)
 
                 id_full_list.append(document_id)
+                if compute_norm:
+                    reverse_index.other_infos['norm']['linear'][document_id] += tf_idf_ponderation
+                    reverse_index.other_infos['norm']['quadratic'][document_id] += tf_idf_ponderation * tf_idf_ponderation
 
         reverse_index.set_id_set(set(id_full_list))
         reverse_index.other_infos['number of documents'] = N
@@ -49,19 +53,25 @@ class Reverse_index_builder:
         return reverse_index
 
     def create_with_ponderation_normal_tf_idf(self, index):
-        reverse_index = self.create_with_ponderation_tf_idf(index)
+        reverse_index = self.create_with_ponderation_tf_idf(index, compute_norm=False)
         reverse_index.other_infos['max_unnormalized_ponderation'] = defaultdict(float)
+        max_ponderation = {}
+        N = len(index)
 
         for word in reverse_index.get_index():
-            # max_ponderation = 0
-            # for document_id in reverse_index.get_entry(word):
-            #   max_ponderation = max(max_ponderation, reverse_index.get_entry(word)[document_id])
-            max_ponderation = max(reverse_index.get_entry(word).values())
-            reverse_index.other_infos['max_unnormalized_ponderation'][word] = max_ponderation
+            max_ponderation[word] = max(reverse_index.get_entry(word).values())
+            reverse_index.other_infos['max_unnormalized_ponderation'][word] = max_ponderation[word]
 
             # In-place modification. Avoids huge entries duplications.
             for document_id in reverse_index.get_entry(word):
-                reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / max_ponderation
+                reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / max_ponderation[word]
+
+        # Re-set norm.
+        for (document_id, tf_counter) in index:
+            for term in tf_counter:
+                sum_element = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term]) / max_ponderation[term]
+                reverse_index.other_infos['norm']['linear'][document_id] += sum_element
+                reverse_index.other_infos['norm']['quadratic'][document_id] += sum_element * sum_element
 
         return reverse_index
 

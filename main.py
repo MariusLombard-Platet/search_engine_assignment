@@ -30,11 +30,11 @@ print 'rev_index : ', t4 - t2
 
 
 # boolean_search = Boolean_search(reverse_index)
-# print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ',
-# print boolean_search.do_search('multiplexor OR nonrational OR series AND NOT conclusion')
+# # print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ',
+# print boolean_search.do_search('series OR conclusion')
 vectorial_search = Vectorial_search(reverse_index)
 
-print vectorial_search.do_search('series conclusion')
+print vectorial_search.do_search('testing hypothesis for assignment on web search with vectorial model')
 t6 = time.time()
 print 'search : ', t6-t4
 

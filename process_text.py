@@ -4,8 +4,8 @@ from collections import Counter
 
 class Process_text:
 
-    def __init__(self, stop_list_path):
-        self.stop_list = map(str.rstrip, open(stop_list_path, 'r').readlines())  # Removing \n at the end of each word
+    def __init__(self, stop_list_filename):
+        self.stop_list = map(str.rstrip, open(stop_list_filename, 'r').readlines())  # Removing \n at the end of each word
 
     def tokenize(self, text):
         return re.findall('\w+', text)

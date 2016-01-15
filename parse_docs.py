@@ -4,7 +4,7 @@ from process_text import Process_text
 
 class Parse_cacm:
 
-    def __init__(self, cacm_words_path, common_words_path):
+    def __init__(self, cacm_words_path, common_words_filename):
         self.lines = open(cacm_words_path, 'r').readlines()
         self.current_line_number = 0
 
@@ -12,7 +12,7 @@ class Parse_cacm:
         self.category_markers = ['.I', '.T', '.W', '.B', '.A', '.N', '.X', '.K', '.C']
 
         self.documents = []
-        self.text_processor = Process_text(common_words_path)
+        self.text_processor = Process_text(common_words_filename)
 
     def parse_file(self):
         # -1 because we do all the iteration stuff at the end of the loop, instead of the beginning. Also, last line is void so we don't care.

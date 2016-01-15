@@ -17,7 +17,7 @@ class Vectorial_search:
                  reverse_index,
                  similarity=SIMILARITY_COSINE,
                  ponderation=Reverse_index_builder.PONDERATION_NORMAL_TF_IDF,
-                 max_results_number=15
+                 max_results_number=-1
                  ):
 
         # Double dependancy (index_builder and this) to ponderation method. Urgh.
@@ -26,7 +26,8 @@ class Vectorial_search:
             raise ValueError(similarity)
         else:
             self.reverse_index = reverse_index
-            self.searching_method = getattr(self, '_search_' + similarity)
+            # self.searching_method = getattr(self, '_search_' + similarity)
+            self.similarity_method = similarity
 
         self.ponderation = ponderation
         self.max_results_number = max_results_number
@@ -36,43 +37,73 @@ class Vectorial_search:
         query_words = re.findall('\w+', query.lower())
         significant_query_words = list(set(query_words).intersection(set(self.reverse_index.get_all_words())))
 
-        similarities = self.searching_method(significant_query_words)
+        similarities = self._search(significant_query_words)
+
+        # Removing documents with similarity of 0
+        for document_id, similarity in similarities.iteritems():
+            if similarity == 0:
+                del similarities[document_id]
+
+        # Rank and truncate
         return [
             document_id for (document_id, similarity) in
             sorted(similarities.items(), key=operator.itemgetter(1), reverse=True)[:self.max_results_number]
         ]
 
-    def _search_cosine(self, query_words):
+    def _search(self, query_words):
         document_similarities = {}
         query_weights = self._query_weight(query_words, self.reverse_index.idf)
+        query_norms = {
+            'linear': sum(query_weights.values()),
+            'quadratic': sum(map(lambda x: x*x, query_weights.values()))
+        }
 
-        # Multiply ponderations from document and from query
         documents_unnormalized_similarities = defaultdict(float)
 
+        # Multiply ponderations from document and from query
         for word in query_words:
             for document_id in self.reverse_index.get_ids_for_term(word):
                 ponderation = self.reverse_index.get_ponderation(word, document_id)
-                documents_unnormalized_similarities[document_id] += ponderation * query_weights[word]
 
-        # Then, divide each document by the sum of the square of its weights
+                documents_unnormalized_similarities[document_id] += getattr(
+                    self, '_get_search_numerator_' + self.similarity_method
+                    )(ponderation, query_weights[word])
+
+        # Then, divide each document by the normalizing function for given similarity method
         for document_id in documents_unnormalized_similarities:
-            document_similarities[document_id] = (
-                documents_unnormalized_similarities[document_id] /
-                float(self.reverse_index.other_infos['norm']['quadratic'][document_id])
+            denominator = getattr(self, '_get_normalizing_term_' + self.similarity_method)(
+                self.reverse_index.other_infos['norms'][document_id],
+                query_norms,
+                documents_unnormalized_similarities[document_id]
             )
-        # We don't need to divide by the norm of the query vector, since it is the same for every document.
 
-        # Order by similarities, return document_ids
+            document_similarities[document_id] = documents_unnormalized_similarities[document_id] / denominator
+
         return document_similarities
 
-    def _search_dice(self, query_words):
-        pass
+    def _get_search_numerator_cosine(self, document_word_ponderation, query_weight):
+        return document_word_ponderation * query_weight
 
-    def _search_jaccard(self, query_words):
-        pass
+    def _get_search_numerator_dice(self, document_word_ponderation, query_weight):
+        return 2 * document_word_ponderation * query_weight
 
-    def _search_overlap(self, query_words):
-        pass
+    def _get_search_numerator_jaccard(self, document_word_ponderation, query_weight):
+        return document_word_ponderation * query_weight
+
+    def _get_search_numerator_overlap(self, document_word_ponderation, query_weight):
+        return document_word_ponderation * query_weight
+
+    def _get_normalizing_term_cosine(self, document_norms, query_norms, document_unnormalized_similarities):
+        return (document_norms['quadratic'] * query_norms['quadratic']) ** 0.5
+
+    def _get_normalizing_term_dice(self, document_norms, query_norms, document_unnormalized_similarities):
+        return document_norms['linear'] + query_norms['linear']
+
+    def _get_normalizing_term_jaccard(self, document_norms, query_norms, document_unnormalized_similarities):
+        return document_norms['linear'] + query_norms['linear'] - document_unnormalized_similarities
+
+    def _get_normalizing_term_overlap(self, document_norms, query_norms, document_unnormalized_similarities):
+        return min(document_norms['linear'], query_norms['linear'])
 
     def _query_weight(self, query_words, idf_counter):
         tf_counter = Counter(query_words)

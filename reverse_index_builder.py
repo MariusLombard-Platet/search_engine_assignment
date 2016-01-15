@@ -34,7 +34,7 @@ class Reverse_index_builder:
         N = len(index)
         reverse_index = Reverse_index()
         reverse_index.idf = self.create_idf_counter(index)
-        reverse_index.other_infos['norm'] = {'quadratic': defaultdict(float), 'linear': defaultdict(float)}
+        reverse_index.other_infos['norms'] = defaultdict(lambda: defaultdict(float))
         id_full_list = []
 
         for (document_id, tf_counter) in index:
@@ -44,8 +44,8 @@ class Reverse_index_builder:
 
                 id_full_list.append(document_id)
                 if compute_norm:
-                    reverse_index.other_infos['norm']['linear'][document_id] += tf_idf_ponderation
-                    reverse_index.other_infos['norm']['quadratic'][document_id] += tf_idf_ponderation * tf_idf_ponderation
+                    reverse_index.other_infos['norms'][document_id]['linear'] += tf_idf_ponderation
+                    reverse_index.other_infos['norms'][document_id]['quadratic'] += tf_idf_ponderation * tf_idf_ponderation
 
         reverse_index.set_id_set(set(id_full_list))
         reverse_index.other_infos['number of documents'] = N
@@ -66,12 +66,12 @@ class Reverse_index_builder:
             for document_id in reverse_index.get_entry(word):
                 reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / max_ponderation[word]
 
-        # Re-set norm.
+        # Set norm.
         for (document_id, tf_counter) in index:
             for term in tf_counter:
                 sum_element = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term]) / max_ponderation[term]
-                reverse_index.other_infos['norm']['linear'][document_id] += sum_element
-                reverse_index.other_infos['norm']['quadratic'][document_id] += sum_element * sum_element
+                reverse_index.other_infos['norms'][document_id]['linear'] += sum_element
+                reverse_index.other_infos['norms'][document_id]['quadratic'] += sum_element * sum_element
 
         return reverse_index
 

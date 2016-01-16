@@ -33,9 +33,11 @@ class Vectorial_search:
         self.max_results_number = max_results_number
 
     def do_search(self, query):
-        # Only use "significant" query words (ie the ones that are in at least one document)
-        query_words = re.findall('\w+', query.lower())
-        significant_query_words = list(set(query_words).intersection(set(self.reverse_index.get_all_words())))
+        """
+        Vectorial search on a query that has been processed by Process_text.
+        """
+        # Only search on words that are actually in the corpus
+        significant_query_words = list(set(query).intersection(set(self.reverse_index.get_all_words())))
 
         similarities = self._search(significant_query_words)
 

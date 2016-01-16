@@ -47,7 +47,7 @@ class Parse_cacm:
 
             line = self.lines[self.current_line_number]
 
-        self.documents.append((document_id, self.text_processor.sanitize_rawtext(content)))
+        self.documents.append((document_id, self.text_processor.sanitize_rawtext_with_stats(content)))
         # The document has been processed.
 
         return None

@@ -8,11 +8,11 @@ class Reverse_index_builder:
     PONDERATION_TF_IDF = 'tf_idf'
     PONDERATION_NORMAL_TF_IDF = 'normal_tf_idf'
     PONDERATION_NORMAL_FREQUENCY = 'normal_frequency'
-
-    # Contains, after init, the method that will be called in order to construct the reverse index
-    ponderation_method = None
+    PONDERATION_LIST = [PONDERATION_NORMAL_TF_IDF, PONDERATION_TF_IDF, PONDERATION_NORMAL_FREQUENCY]
 
     def __init__(self, ponderation_method=PONDERATION_NORMAL_TF_IDF):
+        self.ponderation_name = ponderation_method
+
         if(ponderation_method == self.PONDERATION_TF_IDF):
             self.ponderation_method = self.create_with_ponderation_tf_idf
 
@@ -49,6 +49,7 @@ class Reverse_index_builder:
 
         reverse_index.set_id_set(set(id_full_list))
         reverse_index.other_infos['number of documents'] = N
+        reverse_index.other_infos['ponderation_method'] = self.ponderation_name
 
         return reverse_index
 
@@ -72,6 +73,8 @@ class Reverse_index_builder:
                 sum_element = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term]) / max_ponderation[term]
                 reverse_index.other_infos['norms'][document_id]['linear'] += sum_element
                 reverse_index.other_infos['norms'][document_id]['quadratic'] += sum_element * sum_element
+
+        reverse_index.other_infos['ponderation_method'] = self.ponderation_name
 
         return reverse_index
 

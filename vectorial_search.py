@@ -15,7 +15,6 @@ class Vectorial_search:
     def __init__(self,
                  reverse_index,
                  similarity=SIMILARITY_COSINE,
-                 ponderation=Reverse_index_builder.PONDERATION_NORMAL_TF_IDF,
                  max_results_number=-1
                  ):
 
@@ -27,7 +26,7 @@ class Vectorial_search:
             self.reverse_index = reverse_index
             self.similarity_method = similarity
 
-        self.ponderation = ponderation
+        self.ponderation = self.reverse_index.other_infos['ponderation_method']
         self.max_results_number = max_results_number
 
     def do_search(self, query):

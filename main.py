@@ -5,6 +5,7 @@ from vectorial_search import Vectorial_search
 import time
 import json
 from process_query import Process_query
+import dill
 
 t0 = time.time()
 
@@ -24,6 +25,13 @@ Reverse_index_builder = Reverse_index_builder()
 
 reverse_index = Reverse_index_builder.create_reverse_index(index)
 
+print len(reverse_index.reverse_index)
+print reverse_index.__class__.__name__
+
+# with open('full_reverse_index_motherfucka.bck', 'wb') as output:
+#     dill.dump(reverse_index, output, dill.HIGHEST_PROTOCOL)
+
+
 t4 = time.time()
 print 'rev_index : ', t4 - t2
 # print reverse_index.get_index()
@@ -34,17 +42,20 @@ print 'rev_index : ', t4 - t2
 
 
 boolean_search = Boolean_search(reverse_index)
-boolean_query = query_processor.create_boolean_query_from_json(json.dumps(
-    [['TSS'], ['deal'], ['Time'], ['Sharing'], ['System'], ['operating'], ['system'], ['IBM'], ['computers']]
-))
+# boolean_query = query_processor.create_boolean_query_from_json(json.dumps(
+#     [['TSS'], ['deal'], ['Time'], ['Sharing'], ['System'], ['operating'], ['system'], ['IBM'], ['computers']]
+# ))
+boolean_query = query_processor.create_boolean_query_from_json(json.dumps([['NOT IBM', 'NOT computer'], ['NOT IBM', 'NOT analysis'], ['language']]))
+
+
 print 'dump', boolean_query
 # print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ',
-print 'wesh', len(boolean_search.do_search(boolean_query))
+print boolean_search.do_search(boolean_query)
 
-vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_COSINE)
-query = query_processor.create_vectorial_query_from_string("""which deal with TSS (Time Sharing System), an
-operating system for IBM computers?""")
-print len(vectorial_search.do_search(query))
+# vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_COSINE)
+# query = query_processor.create_vectorial_query_from_string("""which deal with TSS (Time Sharing System), an
+# operating system for IBM computers?""")
+# print vectorial_search.do_search(query)
 # vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_DICE)
 # print vectorial_search.do_search('testing hypothesis for assignment bon web search with vectorial model')
 # vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_JACCARD)
@@ -52,6 +63,6 @@ print len(vectorial_search.do_search(query))
 # vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_OVERLAP)
 # print vectorial_search.do_search('testing hypothesis for assignment on web search with vectorial model')
 t6 = time.time()
-print 'search : ', t6-t4
+print 'search : ', t6 - t4
 
 print 'total : ', t6 - t0

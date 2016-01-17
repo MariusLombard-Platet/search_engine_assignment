@@ -5,7 +5,8 @@ from process_text import Process_text
 class Parse_cacm:
 
     def __init__(self, cacm_words_path, common_words_filename):
-        self.lines = open(cacm_words_path, 'r').readlines()
+        with open(cacm_words_path, 'r') as f:
+            self.lines = f.readlines()
         self.current_line_number = 0
 
         self.document_begin_regex = re.compile('^\.I\s(?P<id>\d*)')

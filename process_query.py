@@ -93,7 +93,7 @@ class Process_query:
             if self._is_real_word(word_list[i]):
                 word_list[i] = self.stemmer.stem(word_list[i], 0, len(word_list[i]) - 1)
             else:
-                word_list[i] = 'not ' + self.stemmer.stem(word_list[i][4:], len(word_list[:4]) - 1)
+                word_list[i] = 'not ' + self.stemmer.stem(word_list[i][4:], 0, len(word_list[:4]) - 1)
 
         return word_list
 

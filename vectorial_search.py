@@ -1,6 +1,5 @@
 from collections import Counter, defaultdict
 from reverse_index_builder import Reverse_index_builder
-import re
 from math import log
 import operator
 
@@ -26,7 +25,6 @@ class Vectorial_search:
             raise ValueError(similarity)
         else:
             self.reverse_index = reverse_index
-            # self.searching_method = getattr(self, '_search_' + similarity)
             self.similarity_method = similarity
 
         self.ponderation = ponderation
@@ -34,23 +32,26 @@ class Vectorial_search:
 
     def do_search(self, query):
         """
-        Vectorial search on a query that has been processed by Process_text.
+        Vectorial search on a query that has been processed by Process_query.
         """
         # Only search on words that are actually in the corpus
         significant_query_words = list(set(query).intersection(set(self.reverse_index.get_all_words())))
 
+        # Do the search
         similarities = self._search(significant_query_words)
 
         # Removing documents with similarity of 0
+        positive_similarities = {}
         for document_id, similarity in similarities.iteritems():
-            if similarity == 0:
-                del similarities[document_id]
+            if similarity > 0:
+                positive_similarities[document_id] = similarity
 
         # Rank and truncate
-        return [
-            document_id for (document_id, similarity) in
-            sorted(similarities.items(), key=operator.itemgetter(1), reverse=True)[:self.max_results_number]
-        ]
+        ranked_similarities = sorted(similarities.items(), key=operator.itemgetter(1), reverse=True)
+        if self.max_results_number > 0:
+            ranked_similarities = ranked_similarities[:self.max_results_number]
+
+        return [document_id for (document_id, similarity) in ranked_similarities]
 
     def _search(self, query_words):
         document_similarities = {}

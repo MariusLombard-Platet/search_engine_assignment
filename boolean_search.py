@@ -11,7 +11,7 @@ class Boolean_search:
 
     def do_search(self, query):
         """
-        Boolean search on a query that has been processed by Process_text.
+        Boolean search on a query that has been processed by Process_query.
         """
         and_clauses_list = query
 
@@ -85,16 +85,20 @@ class Boolean_search:
 
         return similarities
 
-    def _get_relevant_documents_ids(self, query_words_list):
-        if len(query_words_list) == 0:
+    def _get_relevant_documents_ids(self, and_clause_list):
+        # For all words in clause list, get the set of all documents that contain (or do not contain if NOT keyword is present) said word.
+        list_of_relevant_documents_id_sets = map(self._find_set_for_word_clause, and_clause_list)
+
+        if len(list_of_relevant_documents_id_sets) == 0:
             return []
 
-        ordered_query_words_list = sorted(query_words_list, key=len)
-        first_word_clause = ordered_query_words_list[0]
+        # Order the results by the size of the sets, so the intersection will be faster to compute
+        ordered_list_of_relevant_documents_id_sets = sorted(list_of_relevant_documents_id_sets, key=len)
 
-        relevant_documents_ids = self._find_set_for_word_clause(first_word_clause)
-        for unary_word in ordered_query_words_list[1:]:
-            relevant_documents_ids = relevant_documents_ids.intersection(self._find_set_for_word_clause(unary_word))
+        # Do the intersection
+        relevant_documents_ids = ordered_list_of_relevant_documents_id_sets[0]
+        for relevant_documents_id_set in ordered_list_of_relevant_documents_id_sets[1:]:
+            relevant_documents_ids = relevant_documents_ids.intersection(relevant_documents_id_set)
 
         return list(relevant_documents_ids)
 

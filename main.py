@@ -33,16 +33,18 @@ print 'rev_index : ', t4 - t2
 # print reverse_index['series']
 
 
-# boolean_search = Boolean_search(reverse_index)
-# boolean_query = query_processor.create_boolean_query_from_json(json.dumps([['series', 'testing'], ['conclusion']]))
-# print 'dump', boolean_query
+boolean_search = Boolean_search(reverse_index)
+boolean_query = query_processor.create_boolean_query_from_json(json.dumps(
+    [['TSS'], ['deal'], ['Time'], ['Sharing'], ['System'], ['operating'], ['system'], ['IBM'], ['computers']]
+))
+print 'dump', boolean_query
 # print 'results to query "multiplexor OR nonrational OR series AND NOT conclusion" : ',
-# print boolean_search.do_search(boolean_query)
+print 'wesh', len(boolean_search.do_search(boolean_query))
 
 vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_COSINE)
-query = query_processor.create_vectorial_query_from_string("""What articles exist which deal with TSS (Time Sharing System), an
+query = query_processor.create_vectorial_query_from_string("""which deal with TSS (Time Sharing System), an
 operating system for IBM computers?""")
-print vectorial_search.do_search(query)
+print len(vectorial_search.do_search(query))
 # vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_DICE)
 # print vectorial_search.do_search('testing hypothesis for assignment bon web search with vectorial model')
 # vectorial_search = Vectorial_search(reverse_index, Vectorial_search.SIMILARITY_JACCARD)

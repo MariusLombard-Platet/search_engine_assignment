@@ -33,7 +33,7 @@ class Process_query:
         which, after stemming + common-words removal, will give [['nonrat', 'model']]
         """
 
-        query_list = self._byteify(json.loads(query_string))
+        query_list = self._byteify(json.loads(query_string.lower()))
 
         if not self._check_valid_query(query_list):
             raise ValueError('The query does not have a valid format')
@@ -72,15 +72,16 @@ class Process_query:
         return True
 
     def _sanitize_boolean_query(self, query_list):
-        print 'yolo', query_list
         # Stem the elements, remove the common ones
         # For speed reasons, first remove common words, then stem and remove common words
-        for list_element in query_list:
-            list_element[:] = self._boolean_remove_common_words_from_list(list_element)
-            list_element[:] = self._boolean_stem_elements_from_list(list_element)
-            list_element[:] = self._boolean_remove_common_words_from_list(list_element)
-
-        return query_list
+        return map(lambda element:
+                   self._boolean_remove_common_words_from_list(
+                       self._boolean_stem_elements_from_list(
+                           self._boolean_remove_common_words_from_list(
+                               element
+                           )
+                       )
+                   ), query_list)
 
     def _boolean_remove_common_words_from_list(self, word_list):
         # print '_boolean_remove_common_words_from_list', word_list

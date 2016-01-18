@@ -60,7 +60,7 @@ class Measures:
             expected_answers = self.query_answer[query]
 
             t_init = time.time()
-            processed_query = query_processor.create_vectorial_query_from_string(query)
+            processed_query = query_processor.format_query(query)
             t_parse = time.time()
             time_parsing_queries += t_parse - t_init
 

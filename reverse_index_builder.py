@@ -1,6 +1,8 @@
 from collections import defaultdict
 from math import log
 from reverse_index import Reverse_index
+import os.path
+import dill
 
 
 class Reverse_index_builder:
@@ -10,8 +12,10 @@ class Reverse_index_builder:
     PONDERATION_NORMAL_FREQUENCY = 'normal_frequency'
     PONDERATION_LIST = [PONDERATION_NORMAL_TF_IDF, PONDERATION_TF_IDF, PONDERATION_NORMAL_FREQUENCY]
 
-    def __init__(self, ponderation_method=PONDERATION_NORMAL_TF_IDF):
+    def __init__(self, ponderation_method=PONDERATION_NORMAL_TF_IDF, index_type='dict', save_folder_path='data/'):
+        self.save_folder_path = save_folder_path
         self.ponderation_name = ponderation_method
+        self.index_type = index_type
 
         if(ponderation_method == self.PONDERATION_TF_IDF):
             self.ponderation_method = self.create_with_ponderation_tf_idf
@@ -28,11 +32,21 @@ class Reverse_index_builder:
         return None
 
     def create_reverse_index(self, index):
-        return self.ponderation_method(index)
+        # Load reverse index if already exists, create it (and save it) otherwise.
+        reverse_index_file = self.save_folder_path + self.ponderation_name + '.rev'
+        if os.path.isfile(reverse_index_file):
+            with open(reverse_index_file, 'rb') as in_strm:
+                reverse_index = dill.load(in_strm)
+        else:
+            reverse_index = self.ponderation_method(index)
+            with open(reverse_index_file, 'wb') as output:
+                dill.dump(reverse_index, output, dill.HIGHEST_PROTOCOL)
+
+        return reverse_index
 
     def create_with_ponderation_tf_idf(self, index, compute_norm=True):
         N = len(index)
-        reverse_index = Reverse_index()
+        reverse_index = Reverse_index(self.index_type)
         reverse_index.idf = self.create_idf_counter(index)
         reverse_index.other_infos['norms'] = defaultdict(lambda: defaultdict(float))
         id_full_list = []
@@ -55,6 +69,7 @@ class Reverse_index_builder:
 
     def create_with_ponderation_normal_tf_idf(self, index):
         reverse_index = self.create_with_ponderation_tf_idf(index, compute_norm=False)
+        # We need the unnormalized ponderation for vectorial search, when we normalize the query
         reverse_index.other_infos['max_unnormalized_ponderation'] = defaultdict(float)
         max_ponderation = {}
         N = len(index)
@@ -78,9 +93,36 @@ class Reverse_index_builder:
 
         return reverse_index
 
-    def create_create_with_ponderation_normal_frequency(self, index):
-        # TODO
-        pass
+    def create_with_ponderation_normal_frequency(self, index):
+        # w = tf / max_document (tf)
+        N = len(index)
+        reverse_index = Reverse_index(self.index_type)
+        reverse_index.idf = self.create_idf_counter(index)
+        reverse_index.other_infos['norms'] = defaultdict(lambda: defaultdict(float))
+        id_full_list = []
+        max_frequency_in_document = defaultdict(int)
+
+        # First, create unnormalized reverse index...
+        for (document_id, tf_counter) in index:
+            for term in tf_counter:
+                tf_ponderation = tf_counter[term]
+                reverse_index.add_entry(term, document_id, tf_ponderation)
+                max_frequency_in_document[document_id] = max(max_frequency_in_document[document_id], tf_ponderation)
+
+                id_full_list.append(document_id)
+
+        # Then, normalize each term by the maximum frequency occurence in the document
+        for word in reverse_index.get_all_words():
+            for document_id in reverse_index.get_entry(word):
+                reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / max_frequency_in_document[document_id]
+                reverse_index.other_infos['norms'][document_id]['linear'] += tf_ponderation
+                reverse_index.other_infos['norms'][document_id]['quadratic'] += tf_ponderation * tf_ponderation
+
+        reverse_index.set_id_set(set(id_full_list))
+        reverse_index.other_infos['number of documents'] = N
+        reverse_index.other_infos['ponderation_method'] = self.ponderation_name
+
+        return reverse_index
 
     def custom_log(self, number, base=10):
         if number > 0:

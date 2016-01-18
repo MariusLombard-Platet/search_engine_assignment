@@ -123,7 +123,7 @@ class Vectorial_search:
                 query_weights[word] = query_weights_unnormalized[word] / self.reverse_index.other_infos['max_unnormalized_ponderation'][word]
 
         elif self.ponderation == Reverse_index_builder.PONDERATION_NORMAL_FREQUENCY:
-            pass
+            query_weights = self._query_weight_normalized_frequency(query_words)
 
         return query_weights
 
@@ -132,6 +132,19 @@ class Vectorial_search:
         N = self.reverse_index.other_infos['number of documents']
         for word in query_words:
             query_weights[word] = (1 + self._custom_log(tf_counter[word])) * log(float(N) / idf_counter[word])
+
+        return query_weights
+
+    def _query_weight_normalized_frequency(self, query_words):
+        word_count = Counter(query_words)
+        # When the query does not have any significant word.
+        if len(word_count) == 0:
+            return {}
+
+        maximum_frequency = word_count.most_common(1)[0][1]  # Find the highest frequency in the query
+        query_weights = defaultdict(float)
+        for word in query_words:
+            query_weights[word] = word_count[word] / float(maximum_frequency)
 
         return query_weights
 

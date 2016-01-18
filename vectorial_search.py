@@ -18,7 +18,6 @@ class Vectorial_search:
                  max_results_number=-1
                  ):
 
-        # Double dependancy (index_builder and this) to ponderation method. Urgh.
         similarity = similarity.lower()
         if similarity not in self.SIMILARITY_MODEL_LIST:
             raise ValueError(similarity)

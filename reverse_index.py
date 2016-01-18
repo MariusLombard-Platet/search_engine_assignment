@@ -7,9 +7,11 @@ class Reverse_index:
         if index_type == 'BTree':
             self.reverse_index = OOBTree()
             self.index_type = 'BTree'
-        else:
+        elif index_type == 'dict':
             self.reverse_index = defaultdict(dict)
             self.index_type = 'defaultdict'
+        else:
+            raise ValueError('Incorrect index type!')
 
         self.id_set = None
         self.idf = {}

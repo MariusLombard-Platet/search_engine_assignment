@@ -5,20 +5,29 @@ import re
 
 class Process_query:
 
-    def __init__(self, stop_list_filename):
+    def __init__(self, stop_list_filename, format_type='vectorial'):
         self.stop_list = map(str.rstrip, open(stop_list_filename, 'r').readlines())
         self.stemmer = PorterStemmer()
+        self.format_type = format_type
 
-    def create_vectorial_query_from_string(self, query_string):
+    def format_query(self, query):
+        if self.format_type == 'vectorial':
+            return self._create_vectorial_query_from_string(query)
+        elif self.format_type == 'boolean':
+            return self._create_boolean_query_from_json(query)
+        else:
+            raise ValueError('Unsupported query type!')
+
+    def _create_vectorial_query_from_string(self, query_string):
         return self._remove_common_words_from_list(
-            self._boolean_stem_elements_from_list(
-                self._boolean_remove_common_words_from_list(
+            self._stem_elements_from_list(
+                self._remove_common_words_from_list(
                     re.findall('\w+', query_string.lower())
                 )
             )
         )
 
-    def create_boolean_query_from_json(self, query_string):
+    def _create_boolean_query_from_json(self, query_string):
         """
         We only accept NCF queries, ie, a disjunction of conjunctions of terms (possibly negated with NOT).
         The valid accepted format is a list of lists of strings. First-level lists are for disjunctions, second-level for conjunctions.
@@ -97,8 +106,8 @@ class Process_query:
 
         return word_list
 
-    def stem_elements_from_list(self, query_words):
-        return map(lambda x: self.stemmer.stem(x, 0, len(x) - 1))
+    def _stem_elements_from_list(self, query_words):
+        return map(lambda x: self.stemmer.stem(x, 0, len(x) - 1), query_words)
 
     def _remove_common_words_from_list(self, query_words):
         return [word for word in query_words if word not in self.stop_list]

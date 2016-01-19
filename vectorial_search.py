@@ -1,6 +1,6 @@
 from collections import Counter, defaultdict
 from reverse_index_builder import Reverse_index_builder
-from math import log
+from math import log10
 import operator
 
 
@@ -131,7 +131,7 @@ class Vectorial_search:
         query_weights = defaultdict(float)
         N = self.reverse_index.other_infos['number of documents']
         for word in query_words:
-            query_weights[word] = (1 + self._custom_log(tf_counter[word])) * log(float(N) / idf_counter[word])
+            query_weights[word] = (1 + self._custom_log(tf_counter[word])) * log10(float(N) / idf_counter[word])
 
         return query_weights
 
@@ -150,6 +150,6 @@ class Vectorial_search:
 
     def _custom_log(self, number, base=10):
         if number > 0:
-            return log(float(number))
+            return log10(float(number))
         else:
             return 0

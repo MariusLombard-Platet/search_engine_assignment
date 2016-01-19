@@ -8,6 +8,7 @@ from process_query import Process_query
 import re
 from collections import defaultdict
 import configparser
+from pprint import pprint
 
 
 class Search_engine:
@@ -51,7 +52,7 @@ class Search_engine:
 
         while 1:
             query = raw_input('Enter your query:')
-            print research_engine.do_search(query_processor.format_query(query))
+            pprint(research_engine.do_search(query_processor.format_query(query)))
 
     def _get_real_settings(self, user_settings):
         # Checking that all parameters are indeed correct.

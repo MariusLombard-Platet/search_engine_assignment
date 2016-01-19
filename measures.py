@@ -34,7 +34,7 @@ class Measures:
         print 'Loading database...',
         Parser = Parse_cacm('sources/cacm.all', 'sources/common_words')
         index = Parser.parse_file()
-        reverse_index_builder = Reverse_index_builder()
+        reverse_index_builder = Reverse_index_builder(self.ponderation_method)
         reverse_index = reverse_index_builder.create_reverse_index(index)
         print ' Done'
 
@@ -106,12 +106,12 @@ class Measures:
     def _compute_r_measure(self, answers, expected_answers):
         # Quite similar to recall.
         # If we have n expected answers, check how many of them are in the n first results of the query
-        correct_answers_found = set(expected_answers).intersection(answers[0:len(expected_answers) - 1])
+        correct_answers_found = set(expected_answers).intersection(answers[0:len(expected_answers)])
         # Handle case where there is no expected answer : answer = [] => recall = 1, otherwise 0
         if len(expected_answers) != 0:
             return len(correct_answers_found) / float(len(expected_answers))
         else:
-            return len(answers) == 0
+            return 1 if len(answers) == 0 else 0
 
     def _compute_f_measure(self, precision, recall):
         # precision and recall are already float, but better safe than sorry

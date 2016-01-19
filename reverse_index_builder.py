@@ -1,5 +1,5 @@
 from collections import defaultdict
-from math import log
+from math import log10
 from reverse_index import Reverse_index
 import os.path
 import dill
@@ -53,7 +53,7 @@ class Reverse_index_builder:
 
         for (document_id, tf_counter) in index:
             for term in tf_counter:
-                tf_idf_ponderation = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term])
+                tf_idf_ponderation = (1 + self.custom_log(tf_counter[term])) * log10(float(N) / reverse_index.idf[term])
                 reverse_index.add_entry(term, document_id, tf_idf_ponderation)
 
                 id_full_list.append(document_id)
@@ -85,7 +85,7 @@ class Reverse_index_builder:
         # Set norm.
         for (document_id, tf_counter) in index:
             for term in tf_counter:
-                sum_element = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term]) / max_ponderation[term]
+                sum_element = (1 + self.custom_log(tf_counter[term])) * log10(float(N) / reverse_index.idf[term]) / max_ponderation[term]
                 reverse_index.other_infos['norms'][document_id]['linear'] += sum_element
                 reverse_index.other_infos['norms'][document_id]['quadratic'] += sum_element * sum_element
 
@@ -124,9 +124,9 @@ class Reverse_index_builder:
 
         return reverse_index
 
-    def custom_log(self, number, base=10):
+    def custom_log(self, number):
         if number > 0:
-            return log(float(number))
+            return log10(float(number))
         else:
             return 0
 

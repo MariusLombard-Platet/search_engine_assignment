@@ -11,7 +11,7 @@ class Boolean_search:
         self.default_similarity = 0.5
         self.max_results_number = max_results_number
 
-        if reverse_index.other_infos['ponderations_method'] != Reverse_index_builder.PONDERATION_NORMAL_TF_IDF:
+        if reverse_index.other_infos['ponderation_method'] != Reverse_index_builder.PONDERATION_NORMAL_TF_IDF:
             raise ValueError('Boolean request cannot be done with such ponderation method. Please change ponderation to a normalized one')
 
     def do_search(self, query):

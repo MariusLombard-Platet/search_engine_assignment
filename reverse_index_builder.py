@@ -80,12 +80,12 @@ class Reverse_index_builder:
 
             # In-place modification. Avoids huge entries duplications.
             for document_id in reverse_index.get_entry(word):
-                reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / max_ponderation[word]
+                reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / float(max_ponderation[word])
 
         # Set norm.
         for (document_id, tf_counter) in index:
             for term in tf_counter:
-                sum_element = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term]) / max_ponderation[term]
+                sum_element = (1 + self.custom_log(tf_counter[term])) * log(float(N) / reverse_index.idf[term]) / float(max_ponderation[term])
                 reverse_index.other_infos['norms'][document_id]['linear'] += sum_element
                 reverse_index.other_infos['norms'][document_id]['quadratic'] += sum_element * sum_element
 
@@ -114,7 +114,7 @@ class Reverse_index_builder:
         # Then, normalize each term by the maximum frequency occurence in the document
         for word in reverse_index.get_all_words():
             for document_id in reverse_index.get_entry(word):
-                reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / max_frequency_in_document[document_id]
+                reverse_index.get_entry(word)[document_id] = reverse_index.get_entry(word)[document_id] / float(max_frequency_in_document[document_id])
                 reverse_index.other_infos['norms'][document_id]['linear'] += tf_ponderation
                 reverse_index.other_infos['norms'][document_id]['quadratic'] += tf_ponderation * tf_ponderation
 

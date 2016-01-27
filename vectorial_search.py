@@ -78,7 +78,7 @@ class Vectorial_search:
                 documents_unnormalized_similarities[document_id]
             )
 
-            document_similarities[document_id] = documents_unnormalized_similarities[document_id] / denominator
+            document_similarities[document_id] = documents_unnormalized_similarities[document_id] / float(denominator)
 
         return document_similarities
 
@@ -120,7 +120,7 @@ class Vectorial_search:
             query_weights = defaultdict(float)
 
             for word in query_weights_unnormalized:
-                query_weights[word] = query_weights_unnormalized[word] / self.reverse_index.other_infos['max_unnormalized_ponderation'][word]
+                query_weights[word] = query_weights_unnormalized[word] / float(self.reverse_index.other_infos['max_unnormalized_ponderation'][word])
 
         elif self.ponderation == Reverse_index_builder.PONDERATION_NORMAL_FREQUENCY:
             query_weights = self._query_weight_normalized_frequency(query_words)

@@ -2,6 +2,8 @@ from collections import defaultdict
 from parse_docs import Parse_cacm
 from reverse_index_builder import Reverse_index_builder
 from vectorial_search import Vectorial_search
+from boolean_search import Boolean_search
+from config_loader import Config_loader
 # For boolean search, we would have to pre-process the queries, ie, to cheat
 from process_query import Process_query
 import time
@@ -12,21 +14,23 @@ class Measures:
     Quick and dirty code to parse test queries and expected results, and to get measures on code accuracy
     """
 
-    def __init__(
-            self,
-            queries_filename,
-            answers_filename,
-            ponderation_method=Reverse_index_builder.PONDERATION_NORMAL_TF_IDF,
-            similarity_method=Vectorial_search.SIMILARITY_COSINE
-            ):
+    def __init__(self, queries_filename, answers_filename):
+        config_loader = Config_loader('config.ini')
+        self.config = config_loader.load_config()
 
-        # self.query_answer = self._parse_queries_answers(queries_filename, answers_filename)
         self.queries_filename = queries_filename
         self.answers_filename = answers_filename
-        self.ponderation_method = ponderation_method
-        self.similarity_method = similarity_method
-        self.beta = 1
+
+        self.ponderation_method = self.config['Reverse_index']['ponderation']
+        self.beta = self.config['Measures']['beta']
         self.alpha = 1. / (1 + self.beta ** 2)
+        
+        if self.config['Research_engine']['type'] == 'vectorial':        
+            self.similarity_method = self.config['Vectorial_search']['similarity']
+        elif self.config['Research_engine']['type'] == 'boolean':
+            self.p_norm = self.config['Boolean_search']['p_norm']
+            self.default_similarity = self.config['Boolean_search']['default_similarity']
+
         self.lines = []
 
     def run_testing(self):
@@ -34,7 +38,13 @@ class Measures:
         print 'Loading database...',
         Parser = Parse_cacm('sources/cacm.all', 'sources/common_words')
         index = Parser.parse_file()
-        reverse_index_builder = Reverse_index_builder()
+
+        reverse_index_builder = Reverse_index_builder(
+            ponderation_method=self.config['Reverse_index']['ponderation'],
+            index_type=self.config['Reverse_index']['index_type'],
+            save_folder_path=self.config['Reverse_index']['save_folder_path']
+        )
+
         reverse_index = reverse_index_builder.create_reverse_index(index)
         print ' Done'
 
@@ -50,8 +60,15 @@ class Measures:
         recall = []
         r_measure = []
         f_measure = []
-        vectorial_search = Vectorial_search(reverse_index, self.similarity_method)
-        query_processor = Process_query(stop_list_filename='sources/cacm.all')
+        average_precision = []
+
+        if self.config['Research_engine']['type'] == 'vectorial':        
+            search_engine = Vectorial_search(reverse_index, self.similarity_method)
+        elif self.config['Research_engine']['type'] == 'boolean':
+            search_engine = Boolean_search(Reverse_index, self.p_norm, self.default_similarity)
+
+        query_processor = Process_query(stop_list_filename='sources/cacm.all', format_type=self.config['Research_engine']['type'])
+
         print ' Done'
 
         t0 = time.time()
@@ -64,7 +81,9 @@ class Measures:
             t_parse = time.time()
             time_parsing_queries += t_parse - t_init
 
-            answers = vectorial_search.do_search(processed_query)
+            answers_with_score = search_engine.do_search(processed_query)
+            answers = map(lambda (x,y): x, answers_with_score)
+
             t_query = time.time()
             time_doing_researches += t_query - t_parse
 
@@ -72,6 +91,7 @@ class Measures:
             recall.append(self._compute_recall(answers, expected_answers))
             r_measure.append(self._compute_r_measure(answers, expected_answers))
             f_measure.append(self._compute_f_measure(precision[-1], recall[-1]))
+            average_precision.append(self._compute_average_precision(answers, expected_answers))
 
         number_of_tests = float(len(self.query_answer))
         print 'Number of queries tested:', int(number_of_tests), 'in', round(time.time() - t0, 2), 'seconds'
@@ -82,15 +102,19 @@ class Measures:
 ###################################
 #      PERFORMANCE MEASURES       #
 ###################################"""
-        print 'Max Precision:', max(precision), 'average (MAP):', reduce(lambda x, y: x + y, precision) / len(precision)
-        print 'Max Recall:', max(recall), 'average:', reduce(lambda x, y: x + y, recall) / len(recall)
-        print 'Max F-measure', max(f_measure), 'average:', reduce(lambda x, y: x + y, f_measure) / len(f_measure)
-        print 'Min E-measure', 1 - max(f_measure), 'average:', 1 - reduce(lambda x, y: (x + y), f_measure) / len(f_measure)
-        print 'Max R-measure', max(r_measure), 'average:', reduce(lambda x, y: x + y, r_measure) / len(r_measure)
+        print 'Max Precision:', max(precision), 'average:', reduce(lambda x, y: x + y, precision) / float(len(precision))
+        print 'Max Recall:', max(recall), 'average:', reduce(lambda x, y: x + y, recall) / float(len(recall))
+        print 'Max F-measure', max(f_measure), 'average:', reduce(lambda x, y: x + y, f_measure) / float(len(f_measure))
+        print 'Min E-measure', 1 - max(f_measure), 'average:', 1 - reduce(lambda x, y: (x + y), f_measure) / float(len(f_measure))
+        print 'Max R-measure', max(r_measure), 'average:', reduce(lambda x, y: x + y, r_measure) / float(len(r_measure))
+        print 'Mean Average Precision (MAP)', reduce(lambda x, y: x + y, average_precision) / float(len(average_precision))
 
     def _compute_precision(self, answers, expected_answers):
         correct_answers_found = set(expected_answers).intersection(answers)
         return len(correct_answers_found) / float(len(answers))
+
+    def _compute_k_precision(self, results, expected_answers, k):
+        return self._compute_precision(results[:k], expected_answers)
 
     def _compute_recall(self, answers, expected_answers):
         correct_answers_found = set(expected_answers).intersection(answers)
@@ -111,15 +135,32 @@ class Measures:
         if len(expected_answers) != 0:
             return len(correct_answers_found) / float(len(expected_answers))
         else:
-            return len(answers) == 0
+            if len(answers) == 0:
+                return 1.
+            else:
+                return 0.
 
     def _compute_f_measure(self, precision, recall):
         # precision and recall are already float, but better safe than sorry
         # When no answer is expected but we delivered at least one, then precision = recall = 0
         if precision == 0 and recall == 0:
-            return 0
+            return 0.
         else:
             return (1 + self.beta ** 2) * precision * recall / float(self.beta ** 2 * precision + recall)
+
+    def _compute_average_precision(self, answers, expected_answers):
+        avP = 0
+        if len(expected_answers) == 0:
+            if len(answers) == 0:
+                return 1
+            else:
+                return 0
+
+        for i in range(len(answers)):
+            if answers[i] in expected_answers:
+                avP += self._compute_k_precision(answers, expected_answers, i+1)
+
+        return avP/float(len(expected_answers))
 
     def _parse_queries_answers(self, queries_filename, answers_filename):
         queries = self.parse_queries(queries_filename)

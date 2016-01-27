@@ -5,11 +5,10 @@ from reverse_index_builder import Reverse_index_builder
 
 class Boolean_search:
 
-    def __init__(self, reverse_index, p_norm=2, max_results_number=-1):
+    def __init__(self, reverse_index, p_norm=2):
         self.reverse_index = reverse_index
         self.p_norm = p_norm
         self.default_similarity = 0.5
-        self.max_results_number = max_results_number
 
         if reverse_index.other_infos['ponderations_method'] != Reverse_index_builder.PONDERATION_NORMAL_TF_IDF:
             raise ValueError('Boolean request cannot be done with such ponderation method. Please change ponderation to a normalized one')
@@ -28,12 +27,8 @@ class Boolean_search:
                 similarities_for_all_clauses[document_id].append(similarities_for_clause[document_id])
 
         result_with_similarities = self._similarity_or_query(similarities_for_all_clauses)
-        sorted_results = sorted(result_with_similarities.items(), key=operator.itemgetter(1), reverse=True)  # Sort by decreasing similarity
 
-        if self.max_results_number >= 0:
-            sorted_results = sorted_results[0:self.max_results_number]
-
-        return map(lambda (document_id, similarity): document_id, sorted_results)  # Only return the document_ids
+        return sorted(result_with_similarities.items(), key=operator.itemgetter(1), reverse=True)  # Sort by decreasing similarity
 
     def _similarity_or_query(self, similarities_for_all_clauses):
         """

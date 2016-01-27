@@ -15,7 +15,6 @@ class Vectorial_search:
     def __init__(self,
                  reverse_index,
                  similarity=SIMILARITY_COSINE,
-                 max_results_number=-1
                  ):
 
         similarity = similarity.lower()
@@ -26,7 +25,6 @@ class Vectorial_search:
             self.similarity_method = similarity
 
         self.ponderation = self.reverse_index.other_infos['ponderation_method']
-        self.max_results_number = max_results_number
 
     def do_search(self, query):
         """
@@ -45,11 +43,7 @@ class Vectorial_search:
                 positive_similarities[document_id] = similarity
 
         # Rank and truncate
-        ranked_similarities = sorted(similarities.items(), key=operator.itemgetter(1), reverse=True)
-        if self.max_results_number > 0:
-            ranked_similarities = ranked_similarities[:self.max_results_number]
-
-        return [document_id for (document_id, similarity) in ranked_similarities]
+        return sorted(similarities.items(), key=operator.itemgetter(1), reverse=True)
 
     def _search(self, query_words):
         document_similarities = {}

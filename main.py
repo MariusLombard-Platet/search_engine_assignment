@@ -5,6 +5,7 @@ from boolean_search import Boolean_search
 from vectorial_search import Vectorial_search
 from process_query import Process_query
 # import dill
+import time
 import re
 from collections import defaultdict
 import configparser
@@ -34,7 +35,6 @@ class Search_engine:
             research_engine = Vectorial_search(
                 reverse_index=self.reverse_index,
                 similarity=self.config['Vectorial_search']['similarity'],
-                max_results_number=self.config['Research_engine']['max_results_number']
             )
             query_processor = Process_query('sources/common_words', 'vectorial')
 
@@ -42,16 +42,26 @@ class Search_engine:
             research_engine = Boolean_search(
                 reverse_index=self.reverse_index,
                 p_norm=self.config['Boolean_search']['p_norm'],
-                max_results_number=self.config['Research_engine']['max_results_number']
             )
             query_processor = Process_query('sources/common_words', 'boolean')
 
         else:
             raise ValueError('Unsupported research engine type!')
 
+        max_results_number = self.config['Research_engine']['max_results_number']
         while 1:
             query = raw_input('Enter your query:')
-            print research_engine.do_search(query_processor.format_query(query))
+            t0 = time.time()
+            results = research_engine.do_search(query_processor.format_query(query))
+            print len(results), 'results in', time.time()-t0, 'seconds'
+            if max_results_number > 0 and len(results) > max_results_number:
+                results = results[:max_results_number]
+                print 'printing only the first', max_results_number, 'results: \n'
+
+            print 'document id \t score'
+            print '-----------------------------'
+            for (document_id, score) in results:
+                print document_id, '\t\t', score
 
     def _get_real_settings(self, user_settings):
         # Checking that all parameters are indeed correct.

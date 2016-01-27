@@ -1,5 +1,4 @@
 from stemming import PorterStemmer
-import json
 import re
 
 
@@ -20,29 +19,24 @@ class Process_query:
 
     def _create_vectorial_query_from_string(self, query_string):
         return self._remove_common_words_from_list(
-            self._stem_elements_from_list(
-                self._remove_common_words_from_list(
                     re.findall('\w+', query_string.lower())
                 )
-            )
-        )
 
     def _create_boolean_query_from_json(self, query_string):
         """
         We only accept NCF queries, ie, a disjunction of conjunctions of terms (possibly negated with NOT).
-        The valid accepted format is a list of lists of strings. First-level lists are for disjunctions, second-level for conjunctions.
+        The valid accepted format is a string of NCF form.
         Examples:
-            'computer AND series OR NOT conclusion AND testing' => "[['computer', 'series'], ['NOT conclusion', 'testing']]"
-            'study OR preprocessing' => "[['study'], ['preprocessing']]"
-            'IBM AND simulation' => "[['IBM', 'simulation']]"
+            'computer AND series OR NOT conclusion AND testing'
+            'study OR preprocessing'
+            'IBM AND simulation'
 
         Query will be processed by a stemmer and common words will be removed, so there is no need to put them into the query.
         Empty list queries or clauses will return nothing.
         For instance, [[], ['another', 'nonrational', 'model']] is equivalent to [['another', 'nonrational', 'model']],
         which, after stemming + common-words removal, will give [['nonrat', 'model']]
         """
-
-        query_list = self._byteify(json.loads(query_string.lower()))
+        query_list = self._byteify(map(lambda x: x.split(' and '), query_string.split(' or ')))
 
         if not self._check_valid_query(query_list):
             raise ValueError('The query does not have a valid format')

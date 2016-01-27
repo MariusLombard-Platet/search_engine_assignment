@@ -10,7 +10,7 @@ class Boolean_search:
         self.p_norm = p_norm
         self.default_similarity = default_similarity
 
-        if reverse_index.other_infos['ponderations_method'] != Reverse_index_builder.PONDERATION_NORMAL_TF_IDF:
+        if reverse_index.other_infos['ponderation_method'] != Reverse_index_builder.PONDERATION_NORMAL_TF_IDF:
             raise ValueError('Boolean request cannot be done with such ponderation method. Please change ponderation to a normalized one')
 
     def do_search(self, query):
@@ -48,9 +48,6 @@ class Boolean_search:
             result_with_similarities[document_id] = (sum_similarities / float(len(similiarities_for_document))) ** self.p_norm
 
         return result_with_similarities
-
-    # def split_fnc_query_or(self, query):
-    #     return query.split(' or ')
 
     def _search_and_clauses(self, and_clause_list):
         relevant_documents_id = self._get_relevant_documents_ids(and_clause_list)

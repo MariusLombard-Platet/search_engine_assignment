@@ -4,7 +4,6 @@ from reverse_index_builder import Reverse_index_builder
 from vectorial_search import Vectorial_search
 from boolean_search import Boolean_search
 from config_loader import Config_loader
-# For boolean search, we would have to pre-process the queries, ie, to cheat
 from process_query import Process_query
 import time
 
@@ -74,6 +73,7 @@ class Measures:
         t0 = time.time()
         print 'Let\'s get to it! (this may take 5-10 seconds)'
         for query in self.query_answer:
+            print query
             expected_answers = self.query_answer[query]
 
             t_init = time.time()
@@ -110,6 +110,9 @@ class Measures:
         print 'Mean Average Precision (MAP)', reduce(lambda x, y: x + y, average_precision) / float(len(average_precision))
 
     def _compute_precision(self, answers, expected_answers):
+        if len(answers) == 0:
+            return 1. if len(expected_answers) == 0 else 0.
+
         correct_answers_found = set(expected_answers).intersection(answers)
         return len(correct_answers_found) / float(len(answers))
 
@@ -130,15 +133,12 @@ class Measures:
     def _compute_r_measure(self, answers, expected_answers):
         # Quite similar to recall.
         # If we have n expected answers, check how many of them are in the n first results of the query
-        correct_answers_found = set(expected_answers).intersection(answers[0:len(expected_answers) - 1])
+        correct_answers_found = set(expected_answers).intersection(answers[0:len(expected_answers)])
         # Handle case where there is no expected answer : answer = [] => recall = 1, otherwise 0
         if len(expected_answers) != 0:
             return len(correct_answers_found) / float(len(expected_answers))
         else:
-            if len(answers) == 0:
-                return 1.
-            else:
-                return 0.
+            return 1. if len(answers) == 0 else 0.
 
     def _compute_f_measure(self, precision, recall):
         # precision and recall are already float, but better safe than sorry

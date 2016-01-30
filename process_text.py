@@ -32,8 +32,6 @@ class Process_text:
         return Counter(words_list)
 
     def sanitize_rawtext(self, raw_text):
-        # Stemming is quite slow, so we remove identified common words, we stem and we remove the common words we did not identify at first.
-        # This gives a 15% speedup.
         return self._stem(self._remove_common_words(self._tokenize(raw_text.lower())))
 
     def sanitize_rawtext_with_stats(self, raw_text):

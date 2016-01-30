@@ -33,7 +33,7 @@ class Boolean_search:
     def _similarity_or_query(self, similarities_for_all_clauses):
         """
         Computes the similarity for every document on a query like "k1 OR k2 OR k3 ..."
-        where ki are actually already determined in terms of similarity (which is the case in a NCF query :
+        where ki are actually already determined in terms of similarity (which is the case in a NDF query :
         we first compute similarities for all clauses k1 = l1 AND l2 AND l3 AND ..., so there is no problem.)
         """
         result_with_similarities = {}

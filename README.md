@@ -36,7 +36,7 @@ All parameters are written in the `config.ini` file. You may change them to your
 Measures
 --------
 
-Just run `measures.py` to get a whole set of measures for your current config. Warning : this will give strange results for boolean search, since the queries are not in NCF form. See [docs/measures.md](measures.md) for more details.
+Just run `measures.py` to get a whole set of measures for your current config. Warning : this will give strange results for boolean search, since the queries are not in NDF. See [docs/measures.md](measures.md) for more details.
 
 Reverse index
 -------------
@@ -46,7 +46,7 @@ The reverse index has been implemented on CACM database only. It can support var
 Boolean Search
 --------------
 
-Boolean search **must** be typed as NCF, WITHOUT parenthesis, such as : "term1 AND term2 AND NOT term3 OR term1 AND term4". AND/OR/NOT can be lowercase. You cannot search for term AND/OR/NOT, as they are key values. They are nonrelevant anyway and automatically removed from both query and documents.
+Boolean search **must** be typed as NDF, WITHOUT parenthesis, such as : "term1 AND term2 AND NOT term3 OR term1 AND term4". AND/OR/NOT can be lowercase. You cannot search for term AND/OR/NOT, as they are key values. They are nonrelevant anyway and automatically removed from both query and documents.
 
 Results are ranked according to the Extended Boolean Search ranking (see [docs/search.md](docs/search.md) for more infos).
 

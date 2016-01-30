@@ -26,8 +26,8 @@ class Process_query:
 
     def _create_boolean_query_from_json(self, query_string):
         """
-        We only accept NCF queries, ie, a disjunction of conjunctions of terms (possibly negated with NOT).
-        The valid accepted format is a string of NCF form.
+        We only accept NDF queries, ie, a disjunction of conjunctions of terms (possibly negated with NOT).
+        The valid accepted format is a string of NDF form.
         Examples:
             'computer AND series OR NOT conclusion AND testing'
             'study OR preprocessing'

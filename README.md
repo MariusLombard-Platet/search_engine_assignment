@@ -4,6 +4,8 @@ Final Project
 
 The source code is written in Python 2.
 
+The code is self-documented, but you will find useful info in the [docs/](docs/) folder.
+
 To launch the program : simply launch main.py, after having installed the dependecies (see below). You can change the config parameters in the config.ini file.
 
 Dependencies
@@ -39,7 +41,7 @@ Boolean Search
 
 Boolean search **must** be typed as NCF, WITHOUT parenthesis, such as : "term1 AND term2 AND NOT term3 OR term1 AND term4". AND/OR/NOT can be lowercase. You cannot search for term AND/OR/NOT, as they are key values. They are nonrelevant anyway and automatically removed from both query and documents.
 
-Results are ranked according to the Extended Boolean Search ranking (see docs/ for more infos).
+Results are ranked according to the Extended Boolean Search ranking (see [docs/search.md](docs/search.md) for more infos).
 
 
 Vectorial Search

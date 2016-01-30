@@ -18,9 +18,11 @@ class Process_query:
             raise ValueError('Unsupported query type!')
 
     def _create_vectorial_query_from_string(self, query_string):
-        return self._remove_common_words_from_list(
+        return self._vectorial_stem_elements_from_list(
+                self._remove_common_words_from_list(
                     re.findall('\w+', query_string.lower())
                 )
+            )
 
     def _create_boolean_query_from_json(self, query_string):
         """
@@ -78,17 +80,18 @@ class Process_query:
         # Stem the elements, remove the common ones
         # For speed reasons, first remove common words, then stem and remove common words
         return map(lambda element:
-                   self._boolean_remove_common_words_from_list(
-                       self._boolean_stem_elements_from_list(
-                           self._boolean_remove_common_words_from_list(
-                               element
-                           )
+                   self._boolean_stem_elements_from_list(
+                       self._boolean_remove_common_words_from_list(
+                           element
                        )
                    ), query_list)
 
     def _boolean_remove_common_words_from_list(self, word_list):
         # print '_boolean_remove_common_words_from_list', word_list
         return [element for element in word_list if not self._boolean_should_delete(element)]
+
+    def _vectorial_stem_elements_from_list(self, word_list):
+        return map(lambda x: self.stemmer.stem(x, 0, len(x) - 1), word_list)
 
     def _boolean_stem_elements_from_list(self, word_list):
         # print '_boolean_stem_elements_from_list', word_list

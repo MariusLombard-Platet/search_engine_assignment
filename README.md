@@ -25,9 +25,13 @@ You will also need to unzip the [CACM collection](http://ir.dcs.gla.ac.uk/resour
     ├── common_words
     ├── qrels.text
     └── query.text
-
 ```
 
+Parameters
+----------
+
+All parameters are written in the `config.ini` file. You may change them to your needs. If a parameter is not valid, it is silently defaulted
+(default is vectorial search on normal tf-idf with cosine similarity). After changing the parameters, you need to quit the program if you were running it. Both `main.py` and `mesures.py` rely on this config file.
 
 Measures
 --------

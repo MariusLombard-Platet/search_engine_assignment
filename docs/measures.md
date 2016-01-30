@@ -26,8 +26,10 @@ Vectorial Research
 
 The only parameter was the similarity method. It could be one of `cosine`, `dice`, `jaccard`, `overlap`.
 We also have to take into account the ponderation of the reverse index, which could be either of `tf_idf`, `normal_tf_idf`, `normal_frequency`.
+We just show here the MAP value.
 
-|           | tf_idf   | normal_tf_idf | normal_frequency |
+
+|     .     | tf_idf   | normal_tf_idf | normal_frequency |
 |-----------|----------|---------------|------------------|
 | cosine    | 0.1887   | 0.1106        | 0.0511           |
 | dice      | 0.1656   | 0.0995        | 0.0554           |

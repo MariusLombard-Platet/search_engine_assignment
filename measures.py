@@ -37,9 +37,7 @@ class Measures:
 
     def run_testing(self):
         print 'Launching tests!'
-        print 'Loading database...',
-        Parser = Parse_cacm('sources/cacm.all', 'sources/common_words')
-        index = Parser.parse_file()
+        print 'Loading documents...',
 
         reverse_index_builder = Reverse_index_builder(
             ponderation_method=self.config['Reverse_index']['ponderation'],
@@ -47,7 +45,7 @@ class Measures:
             save_folder_path=self.config['Reverse_index']['save_folder_path']
         )
 
-        reverse_index = reverse_index_builder.create_reverse_index(index)
+        reverse_index = reverse_index_builder.create_reverse_index('sources/cacm.all', 'sources/common_words')
         print ' Done'
 
         print 'Loading test data...',

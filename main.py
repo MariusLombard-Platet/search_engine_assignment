@@ -1,5 +1,4 @@
 # coding:utf-8
-from parse_docs import Parse_cacm
 from reverse_index_builder import Reverse_index_builder
 from boolean_search import Boolean_search
 from vectorial_search import Vectorial_search
@@ -15,15 +14,12 @@ class Search_engine:
         config_loader = Config_loader('config.ini')
         self.config = config_loader.load_config()
 
-        # TODO: should not parse input file every time.
-        Parser = Parse_cacm('sources/cacm.all', 'sources/common_words')
-        index = Parser.parse_file()
         reverse_index_builder = Reverse_index_builder(
             ponderation_method=self.config['Reverse_index']['ponderation'],
             index_type=self.config['Reverse_index']['index_type'],
             save_folder_path=self.config['Reverse_index']['save_folder_path']
         )
-        self.reverse_index = reverse_index_builder.create_reverse_index(index)
+        self.reverse_index = reverse_index_builder.create_reverse_index('sources/cacm.all', 'sources/common_words')
 
         self._lauch_engine()
 

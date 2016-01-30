@@ -3,6 +3,7 @@ from math import log10
 from reverse_index import Reverse_index
 import os.path
 import dill
+from parse_docs import Parse_cacm
 
 
 class Reverse_index_builder:
@@ -31,19 +32,30 @@ class Reverse_index_builder:
 
         return None
 
-    def create_reverse_index(self, index):
+    def create_reverse_index(self, documents_filename, common_words_filename):
+
         # Load reverse index if already exists, create it (and save it) otherwise.
         reverse_index_file = self.save_folder_path + self.ponderation_name + '.rev'
         if os.path.isfile(reverse_index_file):
+            print 'Loading reverse index...',
             with open(reverse_index_file, 'rb') as in_strm:
                 reverse_index = dill.load(in_strm)
+            print 'done'
         else:
+            print 'Loading raw documents...',
+            # Parse the documents
+            Parser = Parse_cacm('sources/cacm.all', 'sources/common_words')
+            index = Parser.parse_file()
+            print 'done'
+
+            print 'Creating reverse index...',
             reverse_index = self.ponderation_method(index)
             reverse_index.other_infos['ponderation_method'] = self.ponderation_name
             reverse_index.other_infos['number_of_documents'] = len(index)
 
             with open(reverse_index_file, 'wb') as output:
                 dill.dump(reverse_index, output, dill.HIGHEST_PROTOCOL)
+            print 'done'
 
         return reverse_index
 

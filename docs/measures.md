@@ -7,6 +7,8 @@ This is the results of the MAP value, as given by the script `measures.py` with 
 Note that boolean research has not been taken into account since the queries are not under FNC.  
 Note also that, given that the proportional research does not rely on the ponderation of the reverse index, we don't need to do multiple tests for different ponderations for the reverse index.
 
+The measures have been made with an Intel Core i7-5500U CPU.
+
 Probabilistic research
 ----------------------
 
@@ -29,7 +31,7 @@ We also have to take into account the ponderation of the reverse index, which co
 We just show here the MAP value.
 
 
-|     .     | tf_idf   | normal_tf_idf | normal_frequency |
+|           | tf_idf   | normal_tf_idf | normal_frequency |
 |-----------|----------|---------------|------------------|
 | cosine    | 0.1887   | 0.1106        | 0.0511           |
 | dice      | 0.1656   | 0.0995        | 0.0554           |

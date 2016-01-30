@@ -18,7 +18,7 @@ Run `pip install BTree configparser dill` from command line (you need to install
 You will also need to unzip the [CACM collection](http://ir.dcs.gla.ac.uk/resources/test_collections/cacm/cacm.tar.gz), in `sources` folder. Your folder must look like:
 ```
 ├── search-engine-assignment
-└── cacm
+└── sources
     ├── README
     ├── cacm.all
     ├── cite.info
@@ -32,9 +32,12 @@ You will also need to unzip the [CACM collection](http://ir.dcs.gla.ac.uk/resour
 Measures
 --------
 
-Just run `measures.py` to get a whole set of measures for your current config. Warning : this will give strange results for boolean search, since the queries are not in NCF form.
+Just run `measures.py` to get a whole set of measures for your current config. Warning : this will give strange results for boolean search, since the queries are not in NCF form. See [docs/measures.md](measures.md) for more details.
 
+Reverse index
+-------------
 
+The reverse index has been implemented on CACM database only. It can support various types of ponderation, and is saved in the data/ folder for future uses. See [docs/reverse_index_construction.md](docs/reverse_index_construction.md) for more details.
 
 Boolean Search
 --------------
@@ -47,10 +50,10 @@ Results are ranked according to the Extended Boolean Search ranking (see [docs/s
 Vectorial Search
 ----------------
 
-A vectorial search can be virtually anything. Results are ranked by their similarity.  
+A vectorial search can be virtually anything. Results are ranked by their similarity. See [docs/search.md](docs/search.md) for more details.
 
 
 Probabilistic search
 --------------------
 
-In the same way, a probabilistic query can be anything. Results are ranked by their RSV.
+In the same way, a probabilistic query can be anything. Results are ranked by their RSV. See [docs/search.md](docs/search.md) for more details.

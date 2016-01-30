@@ -3,12 +3,11 @@ from parse_docs import Parse_cacm
 from reverse_index_builder import Reverse_index_builder
 from boolean_search import Boolean_search
 from vectorial_search import Vectorial_search
+from probabilistic_search import Probabilistic_search
 from process_query import Process_query
 from config_loader import Config_loader
 
 import time
-import re
-from collections import defaultdict
 
 
 class Search_engine:
@@ -45,6 +44,13 @@ class Search_engine:
             )
             query_processor = Process_query('sources/common_words', 'boolean')
 
+        elif self.config['Research_engine']['type'] == 'probabilistic':
+            research_engine = Probabilistic_search(
+                reverse_index=self.reverse_index,
+                rsv_relevant_method=self.config['Probabilistic_search']['rsv_relevant_method']
+            )
+
+            query_processor = Process_query('sources/common_words', 'probabilistic')
         else:
             raise ValueError('Unsupported research engine type!')
 

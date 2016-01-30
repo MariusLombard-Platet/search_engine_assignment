@@ -1,6 +1,7 @@
 from vectorial_search import Vectorial_search
 from boolean_search import Boolean_search
 from reverse_index_builder import Reverse_index_builder
+from probabilistic_search import Probabilistic_search
 
 import configparser
 from collections import defaultdict
@@ -34,12 +35,13 @@ class Config_loader:
 
         _check('Boolean_search', 'p_norm', 2., float, 1)
         _check('Boolean_search', 'default_similarity', 0.5, float, 0, 1)
+        _check('Probabilistic_search', 'rsv_relevant_method', 'constant', str, list_of_possible_values=Probabilistic_search.PROBABILITY_LIST)
         _check('Vectorial_search', 'similarity', Vectorial_search.SIMILARITY_COSINE, list_of_possible_values=Vectorial_search.SIMILARITY_MODEL_LIST)
         _check('Reverse_index', 'index_type', 'dict', list_of_possible_values=['dict', 'BTree'])
         _check('Reverse_index', 'save_folder_path', 'data/')
         _check('Reverse_index', 'ponderation', Reverse_index_builder.PONDERATION_TF_IDF, list_of_possible_values=Reverse_index_builder.PONDERATION_LIST)
         _check('Research_engine', 'max_results_number', -1, int, minvalue=-1)
-        _check('Research_engine', 'type', 'vectorial', list_of_possible_values=['boolean', 'vectorial'])
+        _check('Research_engine', 'type', 'vectorial', list_of_possible_values=['boolean', 'vectorial', 'probabilistic'])
         _check('Measures', 'beta', 1, expected_type=float, minvalue=0)
 
         return real_config

@@ -39,6 +39,9 @@ class Reverse_index_builder:
                 reverse_index = dill.load(in_strm)
         else:
             reverse_index = self.ponderation_method(index)
+            reverse_index.other_infos['ponderation_method'] = self.ponderation_name
+            reverse_index.other_infos['number_of_documents'] = len(index)
+
             with open(reverse_index_file, 'wb') as output:
                 dill.dump(reverse_index, output, dill.HIGHEST_PROTOCOL)
 
@@ -62,8 +65,6 @@ class Reverse_index_builder:
                     reverse_index.other_infos['norms'][document_id]['quadratic'] += tf_idf_ponderation * tf_idf_ponderation
 
         reverse_index.set_id_set(set(id_full_list))
-        reverse_index.other_infos['number of documents'] = N
-        reverse_index.other_infos['ponderation_method'] = self.ponderation_name
 
         return reverse_index
 
@@ -89,13 +90,10 @@ class Reverse_index_builder:
                 reverse_index.other_infos['norms'][document_id]['linear'] += sum_element
                 reverse_index.other_infos['norms'][document_id]['quadratic'] += sum_element * sum_element
 
-        reverse_index.other_infos['ponderation_method'] = self.ponderation_name
-
         return reverse_index
 
     def create_with_ponderation_normal_frequency(self, index):
         # w = tf / max_document (tf)
-        N = len(index)
         reverse_index = Reverse_index(self.index_type)
         reverse_index.idf = self.create_idf_counter(index)
         reverse_index.other_infos['norms'] = defaultdict(lambda: defaultdict(float))
@@ -119,8 +117,6 @@ class Reverse_index_builder:
                 reverse_index.other_infos['norms'][document_id]['quadratic'] += tf_ponderation * tf_ponderation
 
         reverse_index.set_id_set(set(id_full_list))
-        reverse_index.other_infos['number of documents'] = N
-        reverse_index.other_infos['ponderation_method'] = self.ponderation_name
 
         return reverse_index
 

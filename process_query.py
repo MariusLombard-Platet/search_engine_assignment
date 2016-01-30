@@ -10,7 +10,7 @@ class Process_query:
         self.format_type = format_type
 
     def format_query(self, query):
-        if self.format_type == 'vectorial':
+        if self.format_type == 'vectorial' or self.format_type == 'probabilistic':
             return self._create_vectorial_query_from_string(query)
         elif self.format_type == 'boolean':
             return self._create_boolean_query_from_json(query)

@@ -12,11 +12,7 @@ class Vectorial_search:
     SIMILARITY_OVERLAP = 'overlap'
     SIMILARITY_MODEL_LIST = [SIMILARITY_COSINE, SIMILARITY_DICE, SIMILARITY_JACCARD, SIMILARITY_OVERLAP]
 
-    def __init__(self,
-                 reverse_index,
-                 similarity=SIMILARITY_COSINE,
-                 ):
-
+    def __init__(self, reverse_index, similarity=SIMILARITY_COSINE):
         similarity = similarity.lower()
         if similarity not in self.SIMILARITY_MODEL_LIST:
             raise ValueError(similarity)
@@ -42,7 +38,7 @@ class Vectorial_search:
             if similarity > 0:
                 positive_similarities[document_id] = similarity
 
-        # Rank and truncate
+        # Rank
         return sorted(similarities.items(), key=operator.itemgetter(1), reverse=True)
 
     def _search(self, query_words):
@@ -123,7 +119,7 @@ class Vectorial_search:
 
     def _query_weight_tf_idf(self, query_words, idf_counter, tf_counter):
         query_weights = defaultdict(float)
-        N = self.reverse_index.other_infos['number of documents']
+        N = self.reverse_index.other_infos['number_of_documents']
         for word in query_words:
             query_weights[word] = (1 + self._custom_log(tf_counter[word])) * log10(float(N) / idf_counter[word])
 

@@ -56,7 +56,7 @@ class Search_engine:
 
         max_results_number = self.config['Research_engine']['max_results_number']
         while 1:
-            query = raw_input('Enter your query:')
+            query = raw_input('Enter your query: ')
             t0 = time.time()
             results = research_engine.do_search(query_processor.format_query(query))
             print len(results), 'results in', time.time()-t0, 'seconds'

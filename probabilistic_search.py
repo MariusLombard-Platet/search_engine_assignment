@@ -28,7 +28,7 @@ class Probabilistic_search:
         return sorted(rsv_results.items(), key=operator.itemgetter(1), reverse=True)
 
     def _add_relevant_contribution_constant(self):
-        return 0
+        return 0  # = log10(0.5/(1-0.5))
 
     def _add_nonrelevant_contribution(self, word):
         return log10(self.reverse_index.other_infos['number_of_documents'] / float(len(self.reverse_index.get_entry(word))))

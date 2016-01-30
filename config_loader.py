@@ -1,5 +1,4 @@
 from vectorial_search import Vectorial_search
-from boolean_search import Boolean_search
 from reverse_index_builder import Reverse_index_builder
 from probabilistic_search import Probabilistic_search
 

@@ -3,6 +3,7 @@ from parse_docs import Parse_cacm
 from reverse_index_builder import Reverse_index_builder
 from vectorial_search import Vectorial_search
 from boolean_search import Boolean_search
+from probabilistic_search import Probabilistic_search
 from config_loader import Config_loader
 from process_query import Process_query
 import time
@@ -23,12 +24,14 @@ class Measures:
         self.ponderation_method = self.config['Reverse_index']['ponderation']
         self.beta = self.config['Measures']['beta']
         self.alpha = 1. / (1 + self.beta ** 2)
-        
-        if self.config['Research_engine']['type'] == 'vectorial':        
+
+        if self.config['Research_engine']['type'] == 'vectorial':
             self.similarity_method = self.config['Vectorial_search']['similarity']
         elif self.config['Research_engine']['type'] == 'boolean':
             self.p_norm = self.config['Boolean_search']['p_norm']
             self.default_similarity = self.config['Boolean_search']['default_similarity']
+        elif self.config['Research_engine']['type'] == 'probabilistic':
+            self.rsv_relevant_method = self.config['Probabilistic_search']['rsv_relevant_method']
 
         self.lines = []
 
@@ -61,11 +64,12 @@ class Measures:
         f_measure = []
         average_precision = []
 
-        if self.config['Research_engine']['type'] == 'vectorial':        
+        if self.config['Research_engine']['type'] == 'vectorial':
             search_engine = Vectorial_search(reverse_index, self.similarity_method)
         elif self.config['Research_engine']['type'] == 'boolean':
-            search_engine = Boolean_search(Reverse_index, self.p_norm, self.default_similarity)
-
+            search_engine = Boolean_search(reverse_index, self.p_norm, self.default_similarity)
+        elif self.config['Research_engine']['type'] == 'probabilistic':
+            search_engine = Probabilistic_search(reverse_index, self.rsv_relevant_method)
         query_processor = Process_query(stop_list_filename='sources/cacm.all', format_type=self.config['Research_engine']['type'])
 
         print ' Done'
@@ -73,7 +77,6 @@ class Measures:
         t0 = time.time()
         print 'Let\'s get to it! (this may take 5-10 seconds)'
         for query in self.query_answer:
-            print query
             expected_answers = self.query_answer[query]
 
             t_init = time.time()
@@ -82,7 +85,7 @@ class Measures:
             time_parsing_queries += t_parse - t_init
 
             answers_with_score = search_engine.do_search(processed_query)
-            answers = map(lambda (x,y): x, answers_with_score)
+            answers = map(lambda (x, y): x, answers_with_score)
 
             t_query = time.time()
             time_doing_researches += t_query - t_parse
